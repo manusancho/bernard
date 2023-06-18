@@ -440,16 +440,17 @@ class Facebook(SimplePlatform):
             "fields": ",".join(fields),
         }
 
-        get = self.session.get(PROFILE_ENDPOINT, params=params)
-        async with get as r:
-            await self._handle_fb_response(r)
+        async with aiohttp.ClientSession() as session:
+            get = session.get(PROFILE_ENDPOINT, params=params)
+            async with get as r:
+                await self._handle_fb_response(r)
 
-            out = {}
+                out = {}
 
-            for data in (await r.json())["data"]:
-                out.update(data)
+                for data in (await r.json())["data"]:
+                    out.update(data)
 
-            return out
+                return out
 
     async def _send_to_messenger_profile(self, page, content):
         """
@@ -476,10 +477,10 @@ class Facebook(SimplePlatform):
         headers = {
             "content-type": "application/json",
         }
-
-        post = self.session.post(
-            PROFILE_ENDPOINT, params=params, headers=headers, data=ujson.dumps(content)
-        )
+        async with aiohttp.ClientSession() as session:
+            post = session.post(
+                PROFILE_ENDPOINT, params=params, headers=headers, data=ujson.dumps(content)
+            )
 
         # noinspection PyBroadException
         try:
@@ -589,8 +590,9 @@ class Facebook(SimplePlatform):
         """
 
         url, params = self._get_subscriptions_endpoint()
-
-        get = self.session.get(url, params=params)
+        
+        async with aiohttp.ClientSession() as session:
+            get = session.get(url, params=params)
 
         async with get as r:
             await self._handle_fb_response(r)
@@ -622,17 +624,18 @@ class Facebook(SimplePlatform):
         headers = {
             "Content-Type": "application/json",
         }
+        
+        async with aiohttp.ClientSession() as session:
+            post = session.post(
+                url,
+                params=params,
+                data=ujson.dumps(data),
+                headers=headers,
+            )
 
-        post = self.session.post(
-            url,
-            params=params,
-            data=ujson.dumps(data),
-            headers=headers,
-        )
-
-        async with post as r:
-            await self._handle_fb_response(r)
-            data = await r.json()
+            async with post as r:
+                await self._handle_fb_response(r)
+                data = await r.json()
 
     async def _check_subscriptions(self):
         """
@@ -826,17 +829,18 @@ class Facebook(SimplePlatform):
             "access_token": self._access_token(request),
         }
 
-        post = self.session.post(
-            MESSAGES_ENDPOINT,
-            params=params,
-            data=msg,
-            headers=headers,
-        )
+        async with aiohttp.ClientSession() as session:
+            post = session.post(
+                MESSAGES_ENDPOINT,
+                params=params,
+                data=msg,
+                headers=headers,
+            )
 
-        logger.debug("Sending: %s", msg)
+            logger.debug("Sending: %s", msg)
 
-        async with post as r:
-            await self._handle_fb_response(r)
+            async with post as r:
+                await self._handle_fb_response(r)
 
     async def _handle_fb_response(self, response: aiohttp.ClientResponse):
         """
@@ -883,17 +887,18 @@ class Facebook(SimplePlatform):
             "access_token": self._access_token(request),
         }
 
-        post = self.session.post(
-            MESSAGES_ENDPOINT,
-            params=params,
-            data=msg_json,
-            headers=headers,
-        )
+        async with aiohttp.ClientSession() as session:
+            post = session.post(
+                MESSAGES_ENDPOINT,
+                params=params,
+                data=msg_json,
+                headers=headers,
+            )
 
-        logger.debug("Sending: %s", msg_json)
+            logger.debug("Sending: %s", msg_json)
 
-        async with post as r:
-            await self._handle_fb_response(r)
+            async with post as r:
+                await self._handle_fb_response(r)
 
     async def get_user(self, user_id, page_id):
         """
@@ -909,10 +914,11 @@ class Facebook(SimplePlatform):
 
         url = GRAPH_ENDPOINT.format(user_id)
 
-        get = self.session.get(url, params=params)
-        async with get as r:
-            await self._handle_fb_response(r)
-            return await r.json()
+        async with aiohttp.ClientSession() as session:
+            get = session.get(url, params=params)
+            async with get as r:
+                await self._handle_fb_response(r)
+                return await r.json()
 
     async def ensure_usable_media(self, media: BaseMedia) -> UrlMedia:
         """

@@ -349,6 +349,7 @@ class Facebook(SimplePlatform):
         """
         Dynamically hooks the right webhook paths
         """
+        print('Facebook verification token: ', self.verify_token)
 
         router.add_get(self.webhook_path, self.check_hook)
         router.add_post(self.webhook_path, self.receive_events)
@@ -591,8 +592,7 @@ class Facebook(SimplePlatform):
 
         url, params = self._get_subscriptions_endpoint()
         
-        async with aiohttp.ClientSession() as session:
-            get = session.get(url, params=params)
+        get = self.session.get(url, params=params)
 
         async with get as r:
             await self._handle_fb_response(r)

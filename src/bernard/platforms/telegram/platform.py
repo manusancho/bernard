@@ -482,16 +482,17 @@ class Telegram(SimplePlatform):
             "content-type": "application/json",
         }
 
-        post = self.session.post(
-            url,
-            data=ujson.dumps(params),
-            headers=headers,
-        )
+        async with aiohttp.ClientSession() as self.session:
+            post = session.post(
+                url,
+                data=ujson.dumps(params),
+                headers=headers,
+            )
 
-        async with post as r:
-            out = await self._handle_telegram_response(r, _ignore)
-            logger.debug("Telegram replied: %s", out)
-            return out
+            async with post as r:
+                out = await self._handle_telegram_response(r, _ignore)
+                logger.debug("Telegram replied: %s", out)
+                return out
 
     async def _handle_telegram_response(self, response, ignore=None):
         """

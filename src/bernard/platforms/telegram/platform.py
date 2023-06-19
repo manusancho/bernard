@@ -483,7 +483,7 @@ class Telegram(SimplePlatform):
             "content-type": "application/json",
         }
 
-        async with aiohttp.ClientSession() as self.session:
+        async with aiohttp.ClientSession() as session:
             post = session.post(
                 url,
                 data=ujson.dumps(params),

@@ -7,6 +7,7 @@ from urllib.parse import quote, urljoin
 
 import jwt
 import ujson
+import aiohttp
 from aiohttp.web_request import Request
 from aiohttp.web_response import json_response
 from aiohttp.web_urldispatcher import UrlDispatcher
